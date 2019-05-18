@@ -1,0 +1,118 @@
+#!/bin/bash
+
+SOURCE_FOLDER="/mnt/tesla/dashcam/*"
+
+PUSHOVER_USER_KEY=""
+PUSHOVER_APP_KEY=""
+
+DISPLAYTIMERETURN=""
+
+function mergeFiles() {
+
+        local STARTPOS=$((${#1}+1))
+
+        local PREFIX=${2:STARTPOS:19}
+
+        local FRONTCAM=$2
+        local LEFTCAM="${1}/${PREFIX}-left_repeater.mp4"
+        local RIGHTCAM="${1}/${PREFIX}-right_repeater.mp4"
+
+        local OUTPUTFILE="${1}/${PREFIX}-combined.mp4"
+	local PREVIEWFILE="${1}/${PREFIX}-preview.mp4"
+	local TIMELAPSEFILE="${1}/${PREFIX}-timelapse.mp4"
+
+        ffmpeg -hide_banner -loglevel quiet  -i $RIGHTCAM -i $FRONTCAM -i $LEFTCAM -filter_complex "[1:v][0:v]scale2ref=oh*mdar:ih[1v][0v];[2:v][0v]scale2ref=oh*mdar:ih[2v][0v];[0v][1v][2v]hstack=3,scale='2*trunc(iw/2)':'2*trunc(ih/2)'" -tune fastdecode -movflags +faststart -threads 0 $OUTPUTFILE
+
+        if test -f "$OUTPUTFILE"; then
+
+		ffmpeg -hide_banner -loglevel quiet -i $OUTPUTFILE -sws_flags lanczos+accurate_rnd -vf "scale=960:240" -c:v libx264 -crf 28 -profile:v main -tune fastdecode -movflags +faststart -threads 0 $PREVIEWFILE
+
+		local ELAPSED=$(ffmpeg -i $PREVIEWFILE 2>&1 | grep "Duration"| cut -d ' ' -f 4 | sed s/,// | sed 's@\..*@@g' | awk '{ split($1, A, ":"); split(A[3], B, "."); print 3600*A[1] + 60*A[2] + B[1] }')
+
+		if  (( $ELAPSED >= 40 )) ; then
+			ffmpeg -hide_banner -loglevel quiet -i $PREVIEWFILE -vf "setpts=0.09*PTS" -c:v libx264 -crf 28 -profile:v main -tune fastdecode -movflags +faststart -threads 0 $TIMELAPSEFILE
+		else
+			cp $PREVIEWFILE $TIMELAPSEFILE
+		fi
+
+                rm $RIGHTCAM
+                rm $LEFTCAM
+                rm $FRONTCAM
+                chmod 666 $OUTPUTFILE
+		chmod 666 $PREVIEWFILE
+		chmod 666 $TIMELAPSEFILE
+        fi
+}
+
+function displayTime() {
+	local T=$1
+	local D=$((T/60/60/24))
+	local H=$((T/60/60%24))
+	local M=$((T/60%60))
+	local S=$((T%60))
+
+	if (( $D > 0 )) ; then
+		DISPLAYTIMERETURN="${D}d "
+	fi
+	if (( $H > 0 )) ; then
+		DISPLAYTIMERETURN+="${H}h "
+	fi
+	if (( $M > 0 )) ; then
+		DISPLAYTIMERETURN+="${M}m "
+	fi
+	if (( $S > 0 )) ; then
+		DISPLAYTIMERETURN+="${S}s"
+	fi
+}
+
+function sendPushover() {
+
+        curl -F "token=$PUSHOVER_APP_KEY" \
+                -F "user=$PUSHOVER_USER_KEY" \
+                -F "title=TeslaMerge Complete" \
+                -F "message=$1 incidents in ${2}. Average $3" \
+                https://api.pushover.net/1/messages > /dev/null 2>$1
+}
+
+function doesCamFileExist() {
+	test -e $1
+}
+
+
+function main() {
+
+	local PROCESSSTART=$SECONDS
+	local RENDERSTART=$SECONDS
+	local CAMPROCESSED=0
+
+	for DIR in $SOURCE_FOLDER
+	do
+		CAMFILE="${DIR}/*-front.mp4"
+		if doesCamFileExist $CAMFILE ; then
+		        for FRONTCAMFILE in $CAMFILE
+        		do
+				RENDERSTART=$SECONDS
+		                mergeFiles $DIR $FRONTCAMFILE
+	        	        ((CAMPROCESSED++))
+                		echo "Render Done in $((SECONDS - RENDERSTART))"
+	        	done
+		fi
+	done
+
+	if (( $CAMPROCESSED > 0)) ; then
+
+		local DURATION=$((SECONDS - PROCESSSTART))
+		local AVERAGE=$((DURATION / CAMPROCESSED))
+
+		displayTime $DURATION
+		sendPushover $CAMPROCESSED $DISPLAYTIMERETURN $AVERAGE
+
+		echo "$CAMPROCESSED files processed. Executed in ${DISPLAYTIMERETURN}. Average Per: $AVERAGE"
+	else
+		echo "No cam files found"
+	fi
+}
+
+
+
+

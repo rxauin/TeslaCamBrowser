@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.352
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "aspnetcore", "aspnetcore", "{3965D420-74A5-417C-BCE6-99DF964383BF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TeslaCamBrowser", "aspnetcore\TeslaCamBrowser.csproj", "{E217ECBD-EF9A-49B4-A132-04C29F650693}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "teslasync", "teslasync", "{5881B64E-1702-49EE-B5CF-DC9BED22C475}"
+	ProjectSection(SolutionItems) = preProject
+		teslasync\teslasync = teslasync\teslasync
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "teslamerge", "teslamerge", "{407D9A32-4425-4995-B43A-01BE9E906413}"
+	ProjectSection(SolutionItems) = preProject
+		teslamerge\teslamerge = teslamerge\teslamerge
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E217ECBD-EF9A-49B4-A132-04C29F650693}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E217ECBD-EF9A-49B4-A132-04C29F650693}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E217ECBD-EF9A-49B4-A132-04C29F650693}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E217ECBD-EF9A-49B4-A132-04C29F650693}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E217ECBD-EF9A-49B4-A132-04C29F650693} = {3965D420-74A5-417C-BCE6-99DF964383BF}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8EB504A5-28DF-4909-B302-C36954FBDCCE}
+	EndGlobalSection
+EndGlobal

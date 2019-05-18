@@ -1,0 +1,60 @@
+﻿@model DateSelectModel
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+
+@using (Html.BeginForm("Index", "Home", FormMethod.Post, new { role = "form" }))
+{
+
+    <br />
+    <h2>Tesla Cam Brower</h2>
+    <div style="width:960px;height:35px;display: table">
+        <div style="width:50%;display: table-cell" >
+            <span>Dates: </span>
+            @Html.DropDownListFor(m => m.SelectedDate, new SelectList(Model.Dates, "Date", "SmallDate"), "-SELECT-", new { @onchange = "this.form.submit();" })
+        </div>
+        <div style="width:200px;display: table-cell;text-align:right">
+            <input type="checkbox" checked="checked" onclick="javascript: toggleChecks()" id="chkMain"/> Toggle
+            <button id="cmdDelete" name="cmdDelete" onclick="javascript: return mapDeleted();" style="margin-left:100px">Delete</button>
+            
+        </div>
+    </div>
+
+    @Html.HiddenFor(m => m.FilesToDelete)
+
+    @if (Model.Files != null && Model.Files.Count > 0)
+    {
+        <span>Cam Files: @Model.Files.Count</span>
+        @foreach (var file in Model.Files)
+        {
+            <div style="width:960px;height:300px;" id="@("div" + file.FileId)">
+
+                <hr />
+                <input type="hidden" id="@("preview" + file.FileId)" value="@file.MappedPreview" />
+                <input type="hidden" id="@("timelapsed" + file.FileId)" value="@file.MappedTimelapse" />
+                <input type="hidden" id="@("movCurrent" + file.FileId)" value="timelapsed" />
+
+                <div style="width:100%;margin:0;display:table">
+                    <div style="width: 60%;display: table-cell;"><h3 id="@("txt" + file.FileId)">Time: @file.Time</h3></div>
+                    <div style="width: 20%;display: table-cell;text-align:right">
+                        <a onclick="javascript: swapVideo('@file.FileId');" id="@("mvswap" + file.FileId)"><img src="~/images/videoswap.png" /></a>
+                        <a href="~/Home/Single/@file.FileId" target="_blank" id="@("link" + file.FileId)"><img src="~/images/link.png" /></a>
+                        <a href="@file.MappedCombined" download id="@("dl" + file.FileId)"><img src="~/images/download.png" /></a>
+                    </div>
+                    <div style="width: 20%;display: table-cell;text-align:right">
+                        <input type="checkbox" id="@("chk" + file.FileId)" checked="checked" sytle="margin-top:10px">Delete
+                        <img src="~/images/greenO.png" onclick="javascript:maximize('@file.FileId');" id="@("o" + file.FileId)" style="visibility:hidden" />
+                        <img src="~/images/minus.png" onclick="javascript:minimize('@file.FileId');" id="@("x" + file.FileId)" style="visibility:visible" />
+                    </div>
+                </div>
+                    <div id="@("movie" + file.FileId)">
+                        <video controls autoplay="autoplay" loop muted id="@("moviePlayer" + file.FileId)">
+                            <source src="@file.MappedTimelapse" type="video/mp4" />
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                </div>
+        }
+    }
+}

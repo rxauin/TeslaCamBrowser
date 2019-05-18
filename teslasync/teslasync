@@ -1,0 +1,112 @@
+#!/bin/bash -eu
+
+SERVER="192.168.2.100"
+USER="root"
+
+CAM_SHARE="/mnt/user/backup/tesla/dashcam"
+MUSIC_SHARE="/mnt/user/backup/tesla/music"
+
+PUSHOVER_USER_KEY=""
+PUSHOVER_APP_KEY=""
+
+CAM_SYNC_COUNT=0
+MUSIC_SYNC_COUNT=0
+DISPLAYTIMERETURN=""
+
+TESLA_MERGE_SERVER="192.168.2.11"
+TESLA_MERGE_USER=""
+TESLA_MERGE_SCRIPT="/home/.../teslamerge"
+
+function sync_cam() {
+
+        CAM_SYNC_COUNT=$(rsync -auvh --chmod=777 -p --stats "$1/TeslaCam/SavedClips/" $USER@$SERVER:$CAM_SHARE | awk '/files $
+        if [ -z "$CAM_SYNC_COUNT" ]; then
+                CAM_SYNC_COUNT=0
+        else
+                rm -r -f -d "$1/TeslaCam/SavedClips/*"
+                pumount $1
+        fi
+}
+
+function sync_music() {
+
+        MUSIC_SYNC_COUNT=$(rsync -ruvh --delete --force --exclude=music --stats "$USER@$SERVER:$MUSIC_SHARE/" $1 | awk '/file$
+        if [ -z "$MUSIC_SYNC_COUNT" ]; then
+                MUSIC_SYNC_COUNT=0
+        else
+                pumount $1
+        fi
+}
+
+function send_pushover() {
+        curl -F "token=$PUSHOVER_APP_KEY" \
+                -F "user=$PUSHOVER_USER_KEY" \
+                -F "title=TeslaSync Complete" \
+                -F "message=Cam: $CAM_SYNC_COUNT Music: $MUSIC_SYNC_COUNT Time: $DISPLAYTIMERETURN" \
+                https://api.pushover.net/1/messages > /dev/null 2>$1
+}
+
+function displayTime() {
+        local T=$1
+        local D=$((T/60/60/24))
+        local H=$((T/60/60%24))
+        local M=$((T/60%60))
+        local S=$((T%60))
+
+        if (( $D > 0 )) ; then
+                DISPLAYTIMERETURN="${D}d "
+        fi
+        if (( $H > 0 )) ; then
+                DISPLAYTIMERETURN+="${H}h "
+        fi
+        if (( $M > 0 )) ; then
+                DISPLAYTIMERETURN+="${M}m "
+        fi
+        if (( $S > 0 )) ; then
+                DISPLAYTIMERETURN+="${S}s"
+        fi
+}
+
+function run_one() {
+        START=$SECONDS
+
+        CAM_SYNC_COUNT=0
+        MUSIC_SYNC_COUNT=0
+        DISPLAYTIMERETURN=""
+
+        for DIR in /media/usb?
+        do
+                if [ -d "$DIR/TeslaCam" ]; then
+                        sync_cam $DIR
+                fi
+
+                if [ -f "$DIR/music" ]; then
+                        sync_music $DIR
+                fi
+        done
+
+        ELAPSED=$(( SECONDS - START ))
+
+        displayTime $DURATION
+        send_pushover
+
+        if (( $CAM_SYNC_COUNT > 0 )) ; then
+                ssh ${TESLA_MERGE_USER}@${TESLA_MERGE_SERVER} $TESLA_MERGE_SCRIPT &
+        fi
+}
+
+function main_loop() {
+        while [ true ]
+        do
+                if [[ $(lsblk | grep "/media/") ]]; then
+                        run_one
+                fi
+
+                sleep 300
+        done
+}
+
+main_loop
+
+exit 0
+

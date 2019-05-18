@@ -1,0 +1,27 @@
+﻿@model FileEntry
+
+<br />
+<h2>Tesla Cam Brower</h2>
+
+@if (Model == null)
+{
+    <span>Movie File Not Found</span>
+}
+else
+{
+    <div style="width:960px;height:340px;" id="@("div" + Model.FileId)">
+
+        <div style="width:100%;margin:0;display:table">
+            <div style="width: 60%;display: table-cell;"><h3 id="@("txt" + Model.FileId)">Time: @Model.Time</h3></div>
+            <div style="width: 20%;display: table-cell;text-align:right"><a href="@Model.MappedCombined" download><img src="~/images/download.png" /></a> </div>
+            <div style="width: 20%;display: table-cell;text-align:right"></div>
+        </div>
+        <div id="@("movie" + Model.FileId)">
+            <video controls="controls" autoplay="autoplay" loop muted>
+                <source src="@Model.MappedPreview" type="video/mp4" />
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        <br />
+    </div>
+}
