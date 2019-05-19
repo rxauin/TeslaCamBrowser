@@ -5,7 +5,12 @@ SOURCE_FOLDER="/mnt/tesla/dashcam/*"
 PUSHOVER_USER_KEY=""
 PUSHOVER_APP_KEY=""
 
+
+#end configuratiables
+
+#global variables
 DISPLAYTIMERETURN=""
+#end global variables
 
 function mergeFiles() {
 
@@ -66,12 +71,15 @@ function displayTime() {
 }
 
 function sendPushover() {
-
-        curl -F "token=$PUSHOVER_APP_KEY" \
-                -F "user=$PUSHOVER_USER_KEY" \
-                -F "title=TeslaMerge Complete" \
-                -F "message=$1 incidents in ${2}. Average $3" \
-                https://api.pushover.net/1/messages > /dev/null 2>$1
+	if [ -z "$PUSHOVER_USER_KEY" ] ; then
+		:
+	else
+	        curl -F "token=$PUSHOVER_APP_KEY" \
+        	        -F "user=$PUSHOVER_USER_KEY" \
+                	-F "title=TeslaMerge Complete" \
+	                -F "message=$1 incidents in ${2}. Average $3" \
+        	        https://api.pushover.net/1/messages > /dev/null 2>$1
+	fi
 }
 
 function doesCamFileExist() {
@@ -101,8 +109,8 @@ function main() {
 
 	if (( $CAMPROCESSED > 0)) ; then
 
-		local DURATION=$((SECONDS - PROCESSSTART))
-		local AVERAGE=$((DURATION / CAMPROCESSED))
+		local DURATION=$(( SECONDS - PROCESSSTART ))
+		local AVERAGE=$(( CAMPROCESSED / DURATION ))
 
 		displayTime $DURATION
 		sendPushover $CAMPROCESSED $DISPLAYTIMERETURN $AVERAGE
@@ -113,6 +121,6 @@ function main() {
 	fi
 }
 
-
+main
 
 

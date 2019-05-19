@@ -2,6 +2,7 @@
 {
     public class FileEntry
     {
+        public string OrderValue { get; set; }
         public string Time { get; set; }
         public string CombinedFile { get; set; }
         public string PreviewFile { get; set; }

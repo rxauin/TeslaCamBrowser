@@ -34,6 +34,15 @@ namespace TeslaCamBrowser.Controllers
         [Authorize]
         public IActionResult Index(DateSelectModel model)
         {
+            if (Request.Method == "POST" && Request.Form.ContainsKey("pageNext"))
+            {
+                model.PageNumber = int.Parse(Request.Form["pageNext"]);
+            }
+            if (Request.Method == "POST" && Request.Form.ContainsKey("pagePrevious"))
+            {
+                model.PageNumber = int.Parse(Request.Form["pagePrevious"]);
+            }
+
             populateModel(model);
 
             if (Request.Method == "POST" && Request.Form.ContainsKey("cmdDelete") && !string.IsNullOrEmpty(model.FilesToDelete))
@@ -58,10 +67,29 @@ namespace TeslaCamBrowser.Controllers
         {
             model.Dates = getDirectories();
 
+            if (model.ItemsPerPage <= 0)
+            {
+                model.ItemsPerPage = 20;
+            }
+            if (model.PageNumber <= 0)
+            {
+                model.PageNumber = 1;
+            }
+
             if (model.SelectedDate != null)
             {
-                model.Files = getFiles(model.SelectedDate);
+                var files = getFiles(model.SelectedDate);
+
+                model.TotalFiles = files.Count();
+                model.TotalPages = (model.TotalFiles / model.ItemsPerPage) + (model.TotalFiles % model.ItemsPerPage > 0 ? 1 : 0);
+
+                model.Files = 
+                    files
+                    .Skip( (model.PageNumber-1) * model.ItemsPerPage )
+                    .Take( Math.Min(model.ItemsPerPage, model.TotalFiles) )
+                    .ToList();
             }
+
         }
 
         private List<DirectoryEntry> getDirectories()
@@ -91,6 +119,7 @@ namespace TeslaCamBrowser.Controllers
             string timepart = previewFileName.Substring(previewFileName.LastIndexOf(Path.DirectorySeparatorChar) + 12, 5);
             DateTime t = new DateTime(YEAR, MONTH, DAY, int.Parse(timepart.Substring(0, 2)), int.Parse(timepart.Substring(3)), 0);
 
+            results.OrderValue = timepart.Substring(0, 2) + timepart.Substring(3);
 
             results.Time = t.ToShortTimeString();
             results.PreviewFile = previewFileName;
@@ -106,7 +135,7 @@ namespace TeslaCamBrowser.Controllers
             return results;
         }
 
-        private List<FileEntry> getFiles(string selectedDate)
+        private IEnumerable<FileEntry> getFiles(string selectedDate)
         {
             List<FileEntry> results = new List<FileEntry>(1);
 
@@ -120,7 +149,8 @@ namespace TeslaCamBrowser.Controllers
                     results.Add(parseFileEntry(file));    
                 }
             }
-            return results;
+
+            return results.OrderBy(i => i.OrderValue);
         }
 
         private void deleteFiles(DateSelectModel model)

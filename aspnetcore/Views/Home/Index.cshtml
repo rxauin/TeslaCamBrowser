@@ -10,27 +10,63 @@
     <br />
     <h2>Tesla Cam Brower</h2>
     <div style="width:960px;height:35px;display: table">
-        <div style="width:50%;display: table-cell" >
-            <span>Dates: </span>
-            @Html.DropDownListFor(m => m.SelectedDate, new SelectList(Model.Dates, "Date", "SmallDate"), "-SELECT-", new { @onchange = "this.form.submit();" })
+        <div style="width:50%;display: table-cell">
+            <div>
+                <span>Dates: </span>
+                @Html.DropDownListFor(m => m.SelectedDate, new SelectList(Model.Dates, "Date", "SmallDate"), "-SELECT-", new { @onchange = "this.form.submit();" })
+                <span>Items Per Page: @Html.TextBoxFor(m => m.ItemsPerPage, new { style = "width:40px;text-align:center" }) <button style="visibility:hidden"></button></span>
+            </div>
         </div>
         <div style="width:200px;display: table-cell;text-align:right">
-            <input type="checkbox" checked="checked" onclick="javascript: toggleChecks()" id="chkMain"/> Toggle
-            <button id="cmdDelete" name="cmdDelete" onclick="javascript: return mapDeleted();" style="margin-left:100px">Delete</button>
-            
+            <button id="cmdDelete" name="cmdDelete" onclick="javascript: return mapDeleted();" style="margin-left:100px">Delete Checked</button>
         </div>
     </div>
+
 
     @Html.HiddenFor(m => m.FilesToDelete)
 
     @if (Model.Files != null && Model.Files.Count > 0)
     {
-        <span>Cam Files: @Model.Files.Count</span>
+        <span>Cam Files: @Model.TotalFiles</span>
+
+        <div style="width:960px;height:35px;display: table">
+            <hr />
+            <div style="width:100%;display: table-cell;text-align:right">
+                <span>
+                    @if (Model.PageNumber > 1)
+                    {
+                        <button id="pagePrevious" name="pagePrevious" style="margin-right:10px" value="@(Model.PageNumber - 1)">
+                            <img src="~/images/leftarrow.png" />
+                        </button>
+                    }
+                    @Model.PageNumber
+                    @if (Model.PageNumber != Model.TotalPages)
+                    {
+                        <button id="nextPage" name="pageNext" style="margin-left:10px" value="@(Model.PageNumber + 1)">
+                            <img src="~/images/rightarrow.png" />
+                        </button>
+                    }
+                </span>
+            </div>
+        </div>
+        <br />
+        <div style="width:960px">
+            <div style="width:100%;margin:0;display:table">
+                <div style="width: 60%;display: table-cell;"></div>
+                <div style="width: 20%;display: table-cell;text-align:right">
+                </div>
+                <div style="width: 15%;display: table-cell;text-align:right">
+                    <input type="checkbox" checked="checked" onclick="javascript: toggleChecks()" id="chkMain" />Toggle
+                </div>
+                <div style="width: 5%;display: table-cell;text-align:right">
+                </div>
+            </div>
+        </div>
+
         @foreach (var file in Model.Files)
         {
             <div style="width:960px;height:300px;" id="@("div" + file.FileId)">
 
-                <hr />
                 <input type="hidden" id="@("preview" + file.FileId)" value="@file.MappedPreview" />
                 <input type="hidden" id="@("timelapsed" + file.FileId)" value="@file.MappedTimelapse" />
                 <input type="hidden" id="@("movCurrent" + file.FileId)" value="timelapsed" />
@@ -42,19 +78,43 @@
                         <a href="~/Home/Single/@file.FileId" target="_blank" id="@("link" + file.FileId)"><img src="~/images/link.png" /></a>
                         <a href="@file.MappedCombined" download id="@("dl" + file.FileId)"><img src="~/images/download.png" /></a>
                     </div>
-                    <div style="width: 20%;display: table-cell;text-align:right">
+                    <div style="width: 15%;display: table-cell;text-align:right">
                         <input type="checkbox" id="@("chk" + file.FileId)" checked="checked" sytle="margin-top:10px">Delete
+                    </div>
+                    <div style="width: 5%;display: table-cell;text-align:right">
                         <img src="~/images/greenO.png" onclick="javascript:maximize('@file.FileId');" id="@("o" + file.FileId)" style="visibility:hidden" />
                         <img src="~/images/minus.png" onclick="javascript:minimize('@file.FileId');" id="@("x" + file.FileId)" style="visibility:visible" />
                     </div>
                 </div>
-                    <div id="@("movie" + file.FileId)">
-                        <video controls autoplay="autoplay" loop muted id="@("moviePlayer" + file.FileId)">
-                            <source src="@file.MappedTimelapse" type="video/mp4" />
-                            Your browser does not support the video tag.
-                        </video>
-                    </div>
+                <div id="@("movie" + file.FileId)">
+                    <video controls autoplay="autoplay" loop muted id="@("moviePlayer" + file.FileId)" width="960" height="240">
+                        <source src="@file.MappedTimelapse" type="video/mp4" />
+                        Your browser does not support the video tag.
+                    </video>
                 </div>
+
+                <hr />
+            </div>
         }
+        <br />
+        <div style="width:960px;height:35px;display: table">
+            <div style="width:100%;display: table-cell;text-align:right">
+                <span>
+                    @if (Model.PageNumber > 1)
+                    {
+                        <button id="pagePrevious" name="pagePrevious" style="margin-right:10px" value="@(Model.PageNumber - 1)">
+                            <img src="~/images/leftarrow.png" />
+                        </button>
+                    }
+                    @Model.PageNumber
+                    @if (Model.PageNumber != Model.TotalPages)
+                    {
+                        <button id="nextPage" name="pageNext" style="margin-left:10px" value="@(Model.PageNumber + 1)">
+                            <img src="~/images/rightarrow.png" />
+                        </button>
+                    }
+                </span>
+            </div>
+        </div>
     }
 }

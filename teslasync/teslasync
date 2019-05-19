@@ -9,13 +9,17 @@ MUSIC_SHARE="/mnt/user/backup/tesla/music"
 PUSHOVER_USER_KEY=""
 PUSHOVER_APP_KEY=""
 
-CAM_SYNC_COUNT=0
-MUSIC_SYNC_COUNT=0
-DISPLAYTIMERETURN=""
-
 TESLA_MERGE_SERVER="192.168.2.11"
 TESLA_MERGE_USER=""
 TESLA_MERGE_SCRIPT="/home/.../teslamerge"
+
+#end configuratiables
+
+#global variables
+CAM_SYNC_COUNT=0
+MUSIC_SYNC_COUNT=0
+DISPLAYTIMERETURN=""
+#end global variables
 
 function sync_cam() {
 
@@ -29,21 +33,28 @@ function sync_cam() {
 }
 
 function sync_music() {
-
+	if [ -z "$MUSIC_SHARE" ] ; then
+		:
+	else
         MUSIC_SYNC_COUNT=$(rsync -ruvh --delete --force --exclude=music --stats "$USER@$SERVER:$MUSIC_SHARE/" $1 | awk '/file$
         if [ -z "$MUSIC_SYNC_COUNT" ]; then
                 MUSIC_SYNC_COUNT=0
         else
                 pumount $1
         fi
+	fi
 }
 
 function send_pushover() {
+	if [ -z "$PUSHOVER_USER_KEY" ] ; then
+		:
+	else
         curl -F "token=$PUSHOVER_APP_KEY" \
                 -F "user=$PUSHOVER_USER_KEY" \
                 -F "title=TeslaSync Complete" \
                 -F "message=Cam: $CAM_SYNC_COUNT Music: $MUSIC_SYNC_COUNT Time: $DISPLAYTIMERETURN" \
                 https://api.pushover.net/1/messages > /dev/null 2>$1
+	fi
 }
 
 function displayTime() {
