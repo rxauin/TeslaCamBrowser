@@ -48,6 +48,8 @@ namespace TeslaCamBrowser.Controllers
             if (Request.Method == "POST" && Request.Form.ContainsKey("cmdDelete") && !string.IsNullOrEmpty(model.FilesToDelete))
             {
                 deleteFiles(model);
+
+                populateModel(model);
             }
 
             return View(model);
@@ -79,6 +81,11 @@ namespace TeslaCamBrowser.Controllers
             if (model.SelectedDate != null)
             {
                 var files = getFiles(model.SelectedDate);
+
+                if (model.PageNumber * model.ItemsPerPage > files.Count())
+                {
+                    model.PageNumber = 1;
+                }
 
                 model.TotalFiles = files.Count();
                 model.TotalPages = (model.TotalFiles / model.ItemsPerPage) + (model.TotalFiles % model.ItemsPerPage > 0 ? 1 : 0);

@@ -72,11 +72,14 @@ namespace TeslaCamBrowser
      
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+
+            //this assumes you use configure a virtual directory in IIS or other hosting software
             app.UseStaticFiles(new StaticFileOptions
             {
                 FileProvider = new PhysicalFileProvider(TeslaConfig.GetValue<string>("DashCamPath")),
                 RequestPath = "/Tesla"
             });
+            
             app.UseAuthentication();
 
             app.UseCookiePolicy();
