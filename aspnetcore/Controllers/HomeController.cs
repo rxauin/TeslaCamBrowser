@@ -60,7 +60,7 @@ namespace TeslaCamBrowser.Controllers
         {
             string date = id.Substring(0, 10);
 
-            FileEntry result = getFiles(date).FirstOrDefault(i => i.FileId == id);
+            FileEntry result = getFiles(null, date).FirstOrDefault(i => i.FileId == id);
 
             return View(result);
         }
@@ -80,7 +80,7 @@ namespace TeslaCamBrowser.Controllers
 
             if (model.SelectedDate != null)
             {
-                var files = getFiles(model.SelectedDate);
+                var files = getFiles(model, model.SelectedDate);
 
                 if (model.PageNumber * model.ItemsPerPage > files.Count())
                 {
@@ -133,6 +133,11 @@ namespace TeslaCamBrowser.Controllers
             results.CombinedFile = previewFileName.Substring(0, previewFileName.Length - 12) + "-combined.mp4";
             results.TimelapseFile = previewFileName.Substring(0, previewFileName.Length - 12) + "-timelapse.mp4";
 
+            results.FrontFile = previewFileName.Substring(0, previewFileName.Length - 12) + "-front.mp4";
+            results.RightRepeaterFile = previewFileName.Substring(0, previewFileName.Length - 12) + "-right_repeater.mp4";
+            results.LeftRepeaterFile = previewFileName.Substring(0, previewFileName.Length - 12) + "-left_repeater.mp4";
+            results.DoneFile = previewFileName.Substring(0, previewFileName.Length - 12) + "-done";
+
             results.MappedPreview = @"/Tesla/" + results.PreviewFile.Substring(_config.Value.DashCamPath.Length).Replace(@"\", "/");
             results.MappedCombined = @"/Tesla/" + results.CombinedFile.Substring(_config.Value.DashCamPath.Length).Replace(@"\", "/");
             results.MappedTimelapse = @"/Tesla/" + results.TimelapseFile.Substring(_config.Value.DashCamPath.Length).Replace(@"\", "/");
@@ -142,7 +147,7 @@ namespace TeslaCamBrowser.Controllers
             return results;
         }
 
-        private IEnumerable<FileEntry> getFiles(string selectedDate)
+        private IEnumerable<FileEntry> getFiles(DateSelectModel model, string selectedDate)
         {
             List<FileEntry> results = new List<FileEntry>(1);
 
@@ -151,9 +156,19 @@ namespace TeslaCamBrowser.Controllers
 
             foreach (string directory in Directory.EnumerateDirectories(_config.Value.DashCamPath, partial))
             {
-                foreach (string file in Directory.EnumerateFiles(directory, "*-preview.mp4"))
+                try
                 {
-                    results.Add(parseFileEntry(file));    
+                    foreach (string file in Directory.EnumerateFiles(directory, "*-preview.mp4"))
+                    {
+                        results.Add(parseFileEntry(file));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (model != null)
+                    {
+                        model.ErrorMessage += $"Error Accessing Folder: {directory} ({ex.Message})\n";
+                    }
                 }
             }
 
@@ -168,15 +183,25 @@ namespace TeslaCamBrowser.Controllers
 
             var filesToDelete = 
                 model.Files
-                    .Join(idsToDelete, i => i.FileId, j => j, (i, j) => new { i.CombinedFile, i.PreviewFile, i.TimelapseFile });
+                    .Join(idsToDelete, i => i.FileId, j => j, (i, j) => new { i.CombinedFile,
+                                                                              i.PreviewFile,
+                                                                              i.TimelapseFile,
+                                                                              i.FrontFile,
+                                                                              i.RightRepeaterFile,
+                                                                              i.LeftRepeaterFile,
+                                                                              i.DoneFile });
 
             filesToDelete
                 .ToList()
                 .ForEach(i =>
                 {
-                    System.IO.File.Delete(i.PreviewFile);
-                    System.IO.File.Delete(i.CombinedFile);
-                    System.IO.File.Delete(i.TimelapseFile);
+                    exceptionLessFileDelete(i.PreviewFile);
+                    exceptionLessFileDelete(i.CombinedFile);
+                    exceptionLessFileDelete(i.TimelapseFile);
+                    exceptionLessFileDelete(i.FrontFile);
+                    exceptionLessFileDelete(i.RightRepeaterFile);
+                    exceptionLessFileDelete(i.LeftRepeaterFile);
+                    exceptionLessFileDelete(i.DoneFile);
                 });
 
             filesToDelete
@@ -193,6 +218,21 @@ namespace TeslaCamBrowser.Controllers
 
             model.Files.RemoveAll(i => idsToDelete.Contains(i.FileId));
             model.FilesToDelete = string.Empty;
+        }
+
+        private void exceptionLessFileDelete(string fileName)
+        {
+            try
+            {
+                if (System.IO.File.Exists(fileName))
+                {
+                    System.IO.File.Delete(fileName);
+                }
+            }
+            catch
+            {
+                //swallowed
+            }
         }
    }
 }

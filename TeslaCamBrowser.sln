@@ -17,6 +17,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "teslamerge", "teslamerge", 
 		teslamerge\teslamerge = teslamerge\teslamerge
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "teslamergewin", "teslamergewin", "{AF2BA09E-A7D7-4F35-BB9C-A5D562AD4216}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeslaMergeWin", "teslamergewin\TeslaMergeWin\TeslaMergeWin.csproj", "{A1ED65CE-0FD8-4321-85B1-D0278D494BF9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,12 +31,17 @@ Global
 		{E217ECBD-EF9A-49B4-A132-04C29F650693}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E217ECBD-EF9A-49B4-A132-04C29F650693}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E217ECBD-EF9A-49B4-A132-04C29F650693}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1ED65CE-0FD8-4321-85B1-D0278D494BF9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1ED65CE-0FD8-4321-85B1-D0278D494BF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1ED65CE-0FD8-4321-85B1-D0278D494BF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1ED65CE-0FD8-4321-85B1-D0278D494BF9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{E217ECBD-EF9A-49B4-A132-04C29F650693} = {3965D420-74A5-417C-BCE6-99DF964383BF}
+		{A1ED65CE-0FD8-4321-85B1-D0278D494BF9} = {AF2BA09E-A7D7-4F35-BB9C-A5D562AD4216}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8EB504A5-28DF-4909-B302-C36954FBDCCE}

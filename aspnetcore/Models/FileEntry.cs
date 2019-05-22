@@ -13,5 +13,10 @@
 
         public bool DeleteFile { get; set; }
         public string FileId { get; set; }
+
+        public string FrontFile { get; set; }
+        public string RightRepeaterFile { get; set; }
+        public string LeftRepeaterFile { get; set; }
+        public string DoneFile { get; set; }
     }
 }

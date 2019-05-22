@@ -9,6 +9,10 @@
 
     <br />
     <h2>Tesla Cam Brower</h2>
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+<span>Error:</span><br/><font color="red"><pre>@Model.ErrorMessage</pre></font><br/>
+    }
     <div style="width:960px;height:35px;display: table">
         <div style="width:50%;display: table-cell">
             <div>
@@ -18,7 +22,10 @@
             </div>
         </div>
         <div style="width:200px;display: table-cell;text-align:right">
-            <button id="cmdDelete" name="cmdDelete" onclick="javascript: return mapDeleted();" style="margin-left:100px">Delete Checked</button>
+            @if (Model.Files != null && Model.Files.Count > 0)
+            {
+                <button id="cmdDelete" name="cmdDelete" onclick="javascript: return mapDeleted();" style="margin-left:100px">Delete Checked</button>
+            }
         </div>
     </div>
 
@@ -32,21 +39,24 @@
         <div style="width:960px;height:35px;display: table">
             <hr />
             <div style="width:100%;display: table-cell;text-align:right">
-                <span>
-                    @if (Model.PageNumber > 1)
-                    {
-                        <button id="pagePrevious" name="pagePrevious" style="margin-right:10px" value="@(Model.PageNumber - 1)">
-                            <img src="~/images/leftarrow.png" />
-                        </button>
-                    }
-                    @Model.PageNumber
-                    @if (Model.PageNumber != Model.TotalPages)
-                    {
-                        <button id="nextPage" name="pageNext" style="margin-left:10px" value="@(Model.PageNumber + 1)">
-                            <img src="~/images/rightarrow.png" />
-                        </button>
-                    }
-                </span>
+                @if (Model.TotalPages > 1)
+                {
+                    <span>
+                        @if (Model.PageNumber > 1)
+                        {
+                            <button id="pagePrevious" name="pagePrevious" style="margin-right:10px" value="@(Model.PageNumber - 1)">
+                                <img src="~/images/leftarrow.png" />
+                            </button>
+                        }
+                        @Model.PageNumber
+                        @if (Model.PageNumber != Model.TotalPages)
+                        {
+                            <button id="nextPage" name="pageNext" style="margin-left:10px" value="@(Model.PageNumber + 1)">
+                                <img src="~/images/rightarrow.png" />
+                            </button>
+                        }
+                    </span>
+                }
             </div>
         </div>
         <br />
@@ -99,21 +109,24 @@
         <br />
         <div style="width:960px;height:35px;display: table">
             <div style="width:100%;display: table-cell;text-align:right">
+                @if (Model.TotalPages > 1)
+                {
                 <span>
                     @if (Model.PageNumber > 1)
-                    {
-                        <button id="pagePrevious" name="pagePrevious" style="margin-right:10px" value="@(Model.PageNumber - 1)">
-                            <img src="~/images/leftarrow.png" />
-                        </button>
-                    }
+                        {
+                    <button id="pagePrevious" name="pagePrevious" style="margin-right:10px" value="@(Model.PageNumber - 1)">
+                        <img src="~/images/leftarrow.png" />
+                    </button>
+                        }
                     @Model.PageNumber
                     @if (Model.PageNumber != Model.TotalPages)
-                    {
-                        <button id="nextPage" name="pageNext" style="margin-left:10px" value="@(Model.PageNumber + 1)">
-                            <img src="~/images/rightarrow.png" />
-                        </button>
-                    }
+                        {
+                    <button id="nextPage" name="pageNext" style="margin-left:10px" value="@(Model.PageNumber + 1)">
+                        <img src="~/images/rightarrow.png" />
+                    </button>
+                        }
                 </span>
+                }
             </div>
         </div>
     }

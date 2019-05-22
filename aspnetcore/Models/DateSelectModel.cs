@@ -17,5 +17,6 @@ namespace TeslaCamBrowser.Models
         public int TotalPages { get; set; }
 
         public string FilesToDelete { get; set; }
+        public string ErrorMessage { get; set; }
     }
 }
